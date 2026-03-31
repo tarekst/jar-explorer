@@ -108,6 +108,7 @@ find_jar_for_class() {
 
   # --- Phase 1: Narrow candidates by hint ---
   local candidates=""
+  local search_limit=30
   if [[ -n "$hint" ]]; then
     candidates=$(grep -i "$hint" "$INDEX_FILE" 2>/dev/null || true)
   elif [[ "$class_name" == *.* ]]; then
@@ -118,6 +119,21 @@ find_jar_for_class() {
       candidates=$(grep -i "$part" "$INDEX_FILE" 2>/dev/null || true)
       [[ -n "$candidates" ]] && break
     done
+  else
+    # No hint, no FQCN: try to derive hint from class name
+    # Split CamelCase into words and search index for each
+    local derived_parts
+    derived_parts=$(echo "$simple_name" | sed 's/\([a-z]\)\([A-Z]\)/\1\n\2/g' | tr '[:upper:]' '[:lower:]')
+    for part in $derived_parts; do
+      [[ ${#part} -lt 3 ]] && continue
+      candidates=$(grep -i "$part" "$INDEX_FILE" 2>/dev/null || true)
+      [[ -n "$candidates" ]] && break
+    done
+    # Final fallback: search entire index
+    if [[ -z "$candidates" ]]; then
+      candidates=$(cat "$INDEX_FILE" 2>/dev/null || true)
+      search_limit=100
+    fi
   fi
 
   if [[ -z "$candidates" ]]; then
@@ -130,12 +146,12 @@ find_jar_for_class() {
   if [[ "$class_name" == *.* ]]; then
     local exact_pattern="${class_name//./\/}.class"
     local result
-    result=$(search_jars "$exact_pattern" "$candidates") && { echo "$result"; return 0; }
+    result=$(search_jars "$exact_pattern" "$candidates" "$search_limit") && { echo "$result"; return 0; }
   fi
 
   # --- Phase 3: Fallback to simple name search in same candidates ---
   local result
-  result=$(search_jars "$simple_pattern" "$candidates") && { echo "$result"; return 0; }
+  result=$(search_jars "$simple_pattern" "$candidates" "$search_limit") && { echo "$result"; return 0; }
 
   # --- Phase 4: Search transitive dependencies via POM ---
   # Parse POM files of candidate JARs to find transitive dependency JARs
@@ -162,7 +178,7 @@ find_jar_for_class() {
   fi
 
   echo "ERROR: Class '$simple_name' not found in hinted JARs or their dependencies." >&2
-  echo "Try: quick-explore.sh $simple_name bouncycastle" >&2
+  echo "Try: quick-explore.sh $simple_name <jar-hint> (e.g. library name like guava, commons-io, spring-web)" >&2
   return 1
 }
 

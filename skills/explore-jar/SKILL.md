@@ -12,25 +12,25 @@ Explore a Java JAR file using javap (fast signatures) or CFR (full decompilation
 ## Quick Lookup (preferred — one call does everything)
 
 ```
-!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/quick-explore.sh "$1" "$2" "$3"`
+!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/quick-explore.sh "$0" "$1" "$2"`
 ```
 
-- `$1` — Class name (e.g. `FileUtils`) or FQCN (e.g. `org.apache.commons.io.FileUtils`)
-- `$2` — JAR hint (e.g. `commons-io`, `guava`) — optional, speeds up search
-- `$3` — Mode: `class` (default, javap) or `source` (CFR decompile)
+- `$0` — Class name (e.g. `FileUtils`) or FQCN (e.g. `org.apache.commons.io.FileUtils`)
+- `$1` — JAR hint (e.g. `commons-io`, `guava`) — optional, speeds up search
+- `$2` — Mode: `class` (default, javap) or `source` (CFR decompile)
 
 ## Advanced Usage
 
-For package browsing, search, or when you have the full JAR path:
+For package browsing, search, or when you have the full JAR path, use these commands manually:
 
 First resolve the JAR:
-```
-!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/find-jar.sh "$1"`
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/find-jar.sh "<artifact-hint>"
 ```
 
 Then explore:
-```
-!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/explore-jar.sh "<jar-path>" "<mode>" "<criteria>"`
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/explore-jar.sh "<jar-path>" "<mode>" "<criteria>"
 ```
 
 ## Modes

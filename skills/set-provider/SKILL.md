@@ -13,5 +13,5 @@ Switch between decompiler backends.
 - `vineflower`: javap for signatures, Vineflower for full decompilation
 
 ```
-!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/set-provider.sh "$1"`
+!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/set-provider.sh "$0"`
 ```
