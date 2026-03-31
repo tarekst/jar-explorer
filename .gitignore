@@ -1,0 +1,4 @@
+tools/
+.claude/settings.local.json
+.idea/
+CLAUDE.md

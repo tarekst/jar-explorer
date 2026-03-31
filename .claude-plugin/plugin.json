@@ -1,0 +1,9 @@
+{
+  "name": "jar-explorer",
+  "version": "0.1.0",
+  "description": "Decompile and explore Java JAR files — read source code of dependencies, search packages, classes, methods, and fields.",
+  "author": {
+    "name": "Tarek Steiß"
+  },
+  "keywords": ["java", "jar", "decompile", "cfr", "bytecode", "source-code"]
+}
