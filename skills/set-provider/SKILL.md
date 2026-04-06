@@ -3,6 +3,7 @@ name: set-provider
 description: Switch the decompiler provider (native or vineflower)
 allowed-tools: Bash
 argument-hint: <native|vineflower>
+model: claude-haiku-4-5-20251001
 ---
 
 # Set Decompiler Provider

@@ -3,6 +3,7 @@ name: explore-jar
 description: Explore Java JAR files — search classes, packages, methods, decompile source
 allowed-tools: Bash, Read, Grep, Glob
 argument-hint: <class-name> [jar-hint] [class|source]
+model: claude-sonnet-4-6
 ---
 
 # Explore JAR

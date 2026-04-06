@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # Resolves the path to a JDK tool (jar, javap, etc.)
 # Usage: source resolve-java.sh; then use $JAR_CMD
 # On Windows/Git Bash, 'jar' may not be on PATH even if 'java' is.

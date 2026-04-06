@@ -1,9 +1,14 @@
 {
   "name": "jar-explorer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Decompile and explore Java JAR files — read source code of dependencies, search packages, classes, methods, and fields.",
   "author": {
-    "name": "Tarek Steiß"
+    "name": "Tarek Steiß",
+    "email": "contact@tarek.codes",
+    "url": "https://tarek.codes/"
   },
+  "license": "MIT",
+  "repository": "https://github.com/tarekst/jar-explorer",
+  "homepage": "https://github.com/tarekst/jar-explorer#readme",
   "keywords": ["java", "jar", "decompile", "cfr", "bytecode", "source-code"]
 }

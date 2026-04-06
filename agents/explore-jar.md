@@ -31,6 +31,8 @@ description: |
   <commentary>During code exploration, Claude needs to read source from a JAR dependency.</commentary>
   </example>
 model: sonnet
+effort: medium
+maxTurns: 5
 color: cyan
 tools: ["Bash", "Read", "Grep", "Glob"]
 ---

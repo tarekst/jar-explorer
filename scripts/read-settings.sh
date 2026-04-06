@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # Reads plugin settings from .claude/jar-explorer.local.md
 # Usage: source read-settings.sh; PROVIDER=$(read_provider)
 

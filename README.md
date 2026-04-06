@@ -13,38 +13,60 @@ A Claude Code plugin that explores Java JAR files. Uses `javap` for instant meth
 claude --plugin-dir /path/to/jar-explorer
 ```
 
-## Usage
+## Documentation
 
-### Command
+### Quick Start
 
 ```
-/jar-explorer:explore-jar <class-name> [jar-hint] [class|source]
+/jar-explorer:explore-jar FileUtils commons-io          # class signatures (javap)
+/jar-explorer:explore-jar ImmutableList guava source     # full source code
+/jar-explorer:explore-jar org.apache.commons.io.FileUtils  # FQCN lookup
 ```
+
+### Commands
+
+| Command | Arguments | Description |
+|---------|-----------|-------------|
+| `/jar-explorer:explore-jar` | `<class-name> [jar-hint] [class\|source]` | Look up a class by simple name or FQCN |
+| `/jar-explorer:set-provider` | `<native\|vineflower>` | Switch the decompiler backend |
 
 ### Modes
 
-| Mode | Speed | Example | Description |
-|------|-------|---------|-------------|
-| `list` | instant | `... guava list` | List all classes |
-| `class` | instant | `... guava class com.google.common.collect.ImmutableList` | javap signatures (methods, fields, types) |
-| `package` | instant | `... spring-core package org.springframework.util` | Signatures for all classes in package |
-| `method` | fast | `... mylib.jar method com.example.Foo#bar` | Find method by name |
-| `search` | fast | `... mylib.jar search "BeanFactory"` | Search across signatures |
-| `source` | slow | `... guava source com.google.common.collect.ImmutableList` | Full decompilation |
-| `search-source` | slow | `... mylib.jar search-source "keyword"` | Full source-level search |
+The quick lookup (`explore-jar`) supports `class` (default) and `source`. For advanced modes, use `explore-jar.sh` directly with a resolved JAR path:
 
-**JAR resolution:**
-- Direct path: `./lib/mylib.jar`
-- Maven coordinate: `org.springframework:spring-core:6.1.0`
-- Partial name: `guava` (searches ~/.m2, ~/.gradle, CWD)
+| Mode | Speed | Description | Example criteria |
+|------|-------|-------------|------------------|
+| `class` | instant | javap signatures — fields, methods, types | `com.example.MyClass` |
+| `package` | instant | javap signatures for all classes in a package (max 50) | `com.example.util` |
+| `method` | fast | Find methods by name across classes | `Foo#bar` or `bar` |
+| `search` | fast | Search across javap signatures | `"BeanFactory"` |
+| `list` | instant | List all classes in the JAR | optional filter |
+| `source` | slow | Full decompilation of a single class | `com.example.MyClass` |
+| `search-source` | slow | Full decompile + grep across all source | `"keyword"` |
 
-### Decompiler Provider
+### JAR Resolution
 
-Switch between decompiler backends:
+The plugin resolves JAR files in multiple ways:
 
-```
-/jar-explorer:set-provider <native|vineflower>
-```
+| Input format | Example | Search scope |
+|-------------|---------|-------------|
+| Direct path | `./lib/mylib.jar` | File system |
+| Maven coordinate | `org.springframework:spring-core:6.1.0` | `~/.m2/repository` |
+| Partial name | `guava`, `commons-io` | `~/.m2`, `~/.gradle`, CWD |
+
+When using a partial name, the plugin also parses POM files of matching JARs to search transitive dependencies.
+
+### Source Lookup Priority
+
+When `source` mode is requested, the plugin tries three strategies in order:
+
+1. **Sources JAR** — looks for a `-sources.jar` next to the bytecode JAR (original source with comments and variable names)
+2. **Decompiler** — falls back to CFR or Vineflower to reconstruct source from bytecode
+3. **Cache** — previously decompiled results are served instantly from disk
+
+A stderr hint indicates the source provenance (`original source` vs `decompiled with CFR/Vineflower`).
+
+### Decompiler Providers
 
 | Provider | Decompiler | Behavior |
 |----------|-----------|----------|
@@ -55,7 +77,17 @@ Both providers use `javap` for signature modes (`class`, `package`, `method`, `s
 
 ### Agent
 
-The `explore-jar` agent triggers automatically when Claude needs to read JAR source code. It prefers fast `javap` modes and only falls back to the configured decompiler when full source is needed.
+The `explore-jar` agent (Sonnet, max 5 turns) triggers automatically when Claude encounters JAR dependencies during code exploration. It prefers fast `javap` signatures and only decompiles when the user explicitly requests source code. Limited to 3 Bash calls per request.
+
+### Caching
+
+| What | Location | TTL |
+|------|----------|-----|
+| JAR index | `$TMPDIR/jar-explorer-cache/jar-index.txt` | 1 hour |
+| Decompiled classes | `$TMPDIR/jar-explorer-cache/<jar-md5>/<provider>/` | permanent |
+| Sources JAR extraction | `$TMPDIR/jar-explorer-cache/<jar-md5>/<provider>/sources-jar/` | permanent |
+
+Each provider has its own cache directory. Switching providers does not invalidate the other's cache.
 
 ## How It Works
 
